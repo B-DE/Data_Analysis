@@ -1,0 +1,9 @@
+name = 업체명(카페명)
+context = 게시글 내용
+label = 수식어(view, photo, dessert, mood)
+confidence = 수식어 분석 신뢰도
+address = 업체 주소
+bigRegion = 지역(시 단위)
+smallRegion = 지역(동,읍면리 단위) 
+industry = 업종
+phone = 전화번호
