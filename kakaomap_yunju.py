@@ -68,8 +68,15 @@ phone = []
 
 for i in nameData:
 
+
+    ## 페이지 새로고침
+    driver.get('https://map.kakao.com/')
+
+
+
     ## 카페명 변수 설정
     searchName = i
+
 
 
     ## 검색어 입력
@@ -88,11 +95,35 @@ for i in nameData:
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 
+    ## 태그 접근
     cafe_lists = soup.select('.placelist > .PlaceItem')
     for cafe in cafe_lists:
-        cafe_address = cafe.select('div.addr > p ')[0].text
+
+
+        ## 주소 저장
+        try:
+            cafe_address = cafe.select('div.addr > p ')[0].text
+            address.append(cafe_address)
+        except:
+            address.append('')
 
 
 
-# 결과값 확인
-print(cafe_address)
+
+
+
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+# 주소 크롤링
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+## 드라이버 종료
+driver.close()
+driver.quit()
+
+
+## 결과값 확인
+print(address)
+# for i in address:
+#     print(i + "\n\n")
