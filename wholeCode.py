@@ -212,36 +212,41 @@ def instaAnalysis():
     driver.quit()
 
 
-    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-    # 머신러닝 url 로그인
-    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-    ## url 열기
-    driver = webdriver.Chrome('C:/Project/chromedriver.exe')
-    driver.get('https://machinelearningforkids.co.uk/#!/login')
-    time.sleep(2)
-
-    ## '로그인' 버튼 클릭
-    driver.find_element_by_xpath("/html/body/div/div/div[2]/div/div[3]/button").click()
-    time.sleep(5)
-
-    ## 로그인
-    utteranceParameter = getUtteranceParameter()
-    ID = utteranceParameter['machine']['id']
-    PASSWORD = utteranceParameter['machine']['password']
-
-    ## ID, Password 입력
-    driver.find_elements_by_name("username")[0].send_keys(ID)
-    driver.find_elements_by_name("password")[0].send_keys(PASSWORD)
-    time.sleep(2)
-
-    ## '로그인' 버튼 클릭
-    driver.find_element_by_xpath("//*[@id='auth0-lock-container-1']/div/div[2]/form/div/div/div/button").click()
-    time.sleep(5)
-
-    ## 드라이버 끄기
-    driver.close()
-    driver.quit()
+    # '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    # # 머신러닝 url 로그인
+    # '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    #
+    # ## url 열기
+    # driver = webdriver.Chrome('C:/Project/chromedriver.exe')
+    # driver.get('https://machinelearningforkids.co.uk/#!/login')
+    # time.sleep(2)
+    #
+    # ## '로그인' 버튼 클릭
+    # driver.find_element_by_xpath("/html/body/div/div/div[2]/div/div[3]/button").click()
+    # time.sleep(5)
+    #
+    # ## 로그인
+    # utteranceParameter = getUtteranceParameter()
+    # ID = utteranceParameter['machine']['id']
+    # PASSWORD = utteranceParameter['machine']['password']
+    #
+    # ## ID, Password 입력
+    # driver.find_elements_by_name("username")[0].send_keys(ID)
+    # driver.find_elements_by_name("password")[0].send_keys(PASSWORD)
+    # time.sleep(2)
+    #
+    # ## '로그인' 버튼 클릭
+    # driver.find_element_by_xpath("//*[@id='auth0-lock-container-1']/div/div[2]/form/div/div/div/button").click()
+    # time.sleep(5)
+    #
+    #
+    # driver.get('https://machinelearningforkids.co.uk/#!/mlproject/auth0%7C600598e65dbf6e006eacc05a/092c7930-5999-11eb-950b-73b1ea51afd9/models')
+    # time.sleep(30)
+    #
+    #
+    # ## 드라이버 끄기
+    # driver.close()
+    # driver.quit()
 
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     # json 파일 호출
@@ -256,9 +261,9 @@ def instaAnalysis():
     df = pd.DataFrame(json_data)
 
     ### 리스트형식으로 게시글 저장
-    data = []
+    ctxData = []
     for i in json_data:
-        data.append(df[i]['context'])
+        ctxData.append(df[i]['context'])
 
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     # 학습 모델
@@ -283,7 +288,7 @@ def instaAnalysis():
     label_data = []
     confi_data = []
 
-    for i in data:
+    for i in ctxData:
 
         ### 게시글 입력
         demoStr = i

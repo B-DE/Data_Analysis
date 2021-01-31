@@ -5,44 +5,42 @@ from selenium import webdriver
 import time
 
 
-
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-# 머신러닝 url 로그인
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-
-## url 열기
-driver = webdriver.Chrome('C:/Project/chromedriver.exe')
-driver.get('https://machinelearningforkids.co.uk/#!/login')
-time.sleep(2)
-
-
-## '로그인' 버튼 클릭
-driver.find_element_by_xpath("/html/body/div/div/div[2]/div/div[3]/button").click()
-time.sleep(5)
-
-
-## 로그인
-id = ''
-password = ''
-
-
-## ID, Password 입력
-driver.find_elements_by_name("username")[0].send_keys(id)
-driver.find_elements_by_name("password")[0].send_keys(password)
-time.sleep(2)
-
-
-## '로그인' 버튼 클릭
-driver.find_element_by_xpath("//*[@id='auth0-lock-container-1']/div/div[2]/form/div/div/div/button").click()
-time.sleep(5)
-
-
-## 드라이버 끄기
-driver.close()
-driver.quit()
-
-
+#
+# '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+# # 머신러닝 url 로그인
+# '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+#
+#
+# ## url 열기
+# driver = webdriver.Chrome('C:/Project/chromedriver.exe')
+# driver.get('https://machinelearningforkids.co.uk/#!/login')
+# time.sleep(2)
+#
+#
+# ## '로그인' 버튼 클릭
+# driver.find_element_by_xpath("/html/body/div/div/div[2]/div/div[3]/button").click()
+# time.sleep(5)
+#
+#
+# ## 로그인
+# id = 'yunjukang2000@gmail.com'
+# password = 'vmEAM1axMYgk'
+#
+#
+# ## ID, Password 입력
+# driver.find_elements_by_name("username")[0].send_keys(id)
+# driver.find_elements_by_name("password")[0].send_keys(password)
+# time.sleep(2)
+#
+#
+# ## '로그인' 버튼 클릭
+# driver.find_element_by_xpath("//*[@id='auth0-lock-container-1']/div/div[2]/form/div/div/div/button").click()
+# time.sleep(5)
+#
+#
+# ## 드라이버 끄기
+# driver.close()
+# driver.quit()
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 # json 파일 호출
@@ -56,18 +54,16 @@ with open(file_path) as json_file:
 
 
 
+
 ## 데이터 형식 변경
 
 ### 데이터프레임 형식
 df = pd.DataFrame(json_data)
 
 ### 리스트형식으로 게시글 저장
-data = []
+ctxData = []
 for i in json_data:
-    data.append(df[i]['context'])
-
-
-
+    ctxData.append(df[i]['context'])
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 # 학습 모델
@@ -77,9 +73,9 @@ for i in json_data:
 ## 수식어 분석 기능(meaching learning for kids)
 def classify(text):
     key = "bf8af0a0-5a41-11eb-99e6-fb4ecbaf4f51248f7a0e-6e01-438d-810a-7171f54c646e"
-    url = "https://machinelearningforkids.co.uk/api/scratch/"+ key + "/classify"
+    url = "https://machinelearningforkids.co.uk/api/scratch/" + key + "/classify"
 
-    response = requests.get(url, params={ "data" : text })
+    response = requests.get(url, params={"data": text})
 
     if response.ok:
         responseData = response.json()
@@ -89,18 +85,12 @@ def classify(text):
         response.raise_for_status()
 
 
-
-
-
 ## 게시글 분석
-
 
 label_data = []
 confi_data = []
 
-
-
-for i in data:
+for i in ctxData:
 
     ### 게시글 입력
     demoStr = i
@@ -111,11 +101,7 @@ for i in data:
     ### 신뢰도
     confidence = demo["confidence"]
 
-
-
-
     ### 결과 저장
-
 
     #### 신뢰도가 60이상인 경우 수식어 저장
     #### 신뢰도가 낮은 경우 'non'으로 저장
@@ -124,10 +110,8 @@ for i in data:
     else:
         label_data.append('non')
 
-
     #### 신뢰도 저장
-    confi_data.append("%d%%" %(confidence))
-
+    confi_data.append("%d%%" % (confidence))
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 # json 저장
@@ -135,11 +119,24 @@ for i in data:
 
 ## label, confidence 추가
 count = int(0)
-for i in json_data:
-    json_data['%s'%i]['label'] = label_data[count]
-    json_data['%s'%i]['confidence'] = confi_data[count]
+
+for i in ctxData:
+    try:
+        json_data['%s' % i]['label'] = label_data[count]
+    except:
+        print("no label")
+    try:
+        json_data['%s' % i]['confidence'] = confi_data[count]
+    except:
+        print("confidence error")
     count += 1
 
+
+
+
+''''''''''''''''''''''''''''''''''''''''''''''''''
+# 결과 출력
+''''''''''''''''''''''''''''''''''''''''''''''''''
 
 ## 파일 수정
 with open(file_path, 'w', encoding='utf-8') as make_file:
