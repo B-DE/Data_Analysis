@@ -13,12 +13,6 @@ from bs4 import BeautifulSoup
 from flask import Flask, request, json
 
 
-# 전역변수 설정
-
-# ## BeautifulSoup 설정
-# html = driver.page_source
-# soup = BeautifulSoup(html, 'html.parser')
-
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -243,7 +237,7 @@ def industryCrawling(name):
     for cafe in cafe_list:
 
 
-        #try:
+        try:
 
 
             ## 검색 게시물의 카페명
@@ -275,9 +269,9 @@ def industryCrawling(name):
             count += 1
 
 
-        # except:
-        #     print('industry error')
-        #     return ''
+        except:
+            print('industry error')
+            return ''
 
 
 
@@ -311,7 +305,7 @@ phone = []
 
 
 
-## json 파일 열기 ->
+## json 파일 열기/ 저장 -> 드라이버 연결
 nameData = json_open(json_path)
 driver = driverConnect(driver_path, url)
 
@@ -347,6 +341,7 @@ for name in nameData:
     time.sleep(0.2)
 
     print('----------------------------')
+
 
 
 #
