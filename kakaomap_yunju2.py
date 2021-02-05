@@ -243,7 +243,7 @@ def industryCrawling(name):
     for cafe in cafe_list:
 
 
-        try:
+        #try:
 
 
             ## 검색 게시물의 카페명
@@ -252,7 +252,7 @@ def industryCrawling(name):
 
             ## 업종명 저장 (일치하는 게시물에 대해)
             if (name == searchedName):
-                cafe_indust = cafe.select('.tit_name .subcategory clickable')[0].text
+                cafe_indust = cafe.select('.PlaceItem.clickArea .clickable')[0].text
                 print(cafe_indust)
                 return cafe_indust
 
@@ -275,9 +275,17 @@ def industryCrawling(name):
             count += 1
 
 
-        except:
-            print('industry error')
-            return ''
+        # except:
+        #     print('industry error')
+        #     return ''
+
+
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+# json 데이터 저장
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 
 
 
@@ -292,7 +300,7 @@ def industryCrawling(name):
 json_path = 'C:\Project\Data_yun9u_00.json'
 driver_path = 'C:/Project/chromedriver.exe'
 url = 'https://map.kakao.com/'
-# name = '커피프렌즈'
+name = '커피프렌즈'
 
 
 address = []
@@ -323,15 +331,15 @@ for name in nameData:
     ## 카페 검색
     searchDriver = searchName(name, url)
 
-    # ## 주소 크롤링
-    # a = addressCrawling(name)
-    # address.append(a)
-    # time.sleep(0.2)
-    #
-    # ## 번호 크롤링
-    # p = phoneCrawling(name)
-    # phone.append(p)
-    # time.sleep(0.2)
+    ## 주소 크롤링
+    a = addressCrawling(name)
+    address.append(a)
+    time.sleep(0.2)
+
+    ## 번호 크롤링
+    p = phoneCrawling(name)
+    phone.append(p)
+    time.sleep(0.2)
 
     ## 업종 크롤링
     i = industryCrawling(name)
@@ -341,6 +349,14 @@ for name in nameData:
     print('----------------------------')
 
 
+#
+# ## 카페 검색
+# searchDriver = searchName(name, url)
+#
+# ## 업종 크롤링
+# i = industryCrawling(name)
+# industry.append(i)
+# time.sleep(0.2)
 
 
 
