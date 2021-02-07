@@ -36,103 +36,40 @@
 
 # 코드 파일 설명
 
-## instaCrawling_common.py
+## wholeCode2.py
 
 ##### [기능]
 
-인스타그램에서 '저장 게시물'의 업소명과 게시글 크롤링
+- 인스타 크롤링
 
-##### [주의사항]
+  1. 인스타 로그인
+  2. 게시글 접근
+  3. 카페명(첫번째 해시태그), 게시글 크롤링
 
-- 저장 게시글에 접근하기 위해 로그인이 필요함
+  ​
 
-  (ID와 Password는 이 코드 내에서 수정)
+- 데이터 분석
 
-- 크롬 드라이버를 다운받은 후, 파일 경로를 설정해줘야함
+  - 카카오맵
 
-  (이 또한 코드 내에서 설정)
+    1. 카페명 검색
+    2. 주소, 전화번호, 업종 크롤링
 
-- 크롤링한 데이터는 json 형식 파일에 저장함
+  - 머신러닝
 
-  (파일명과 경로는 코드에서 수정)
+    1. 학습모델 호출('https://machinelearningforkids.co.uk/api/scratch/bf8af0a0-5a41-11eb-99e6-fb4ecbaf4f51248f7a0e-6e01-438d-810a-7171f54c646e/classify')
 
-##### [개선사항]
+    2. 게시글 입력
 
-Chrome driver의 headless 기능 설정
+    3. 수식어, 신뢰도 분석
 
-##### [논의사항]
+       (게시글을 분석하여 dessert, photo, view, mood 중 하나의 수식어를 도출함)
 
-게시글에서 사진 혹은 동영상의 데이터도 크롤링해올것인가?
+       ​
 
+- 데이터 저장
 
-
-
-
-
-
-## instaCrawling_yunju.py
-
-##### [기능]
-
-인스타 크롤링 기능. host url과 연결하여 테스트할 수 있음.
-
-##### [주의사항]
-
-로그인을 하기위해 ID와 Password 정보를 외부에서 받아야함
-
-(Postman이라는 서비스를 이용하였음)
-
-
-
-
-
-
-
-## dataAnalysis_yunju.py
-
-##### [기능]
-
-게시글를 통해 수식어를 분석하는 기능
-
-##### [주의사항]
-
-- instaCrawling을 통해 저장한 json 파일을 불러옴
-
-- 분석 후 동일한 json파일에 내용 저장
-
-  (파일을 읽고 수정할 때 코드 내에서 경로 설정)
-
-- 분석 모델은 'machine learning for kids'라는 사이트에서 학습함
-
-  (모델을 활성화하기 위해 사이트에서 yunjukang2000@gmail.com로 로그인해야함)
-
-##### [개선사항]
-
-장기간 로그아웃시 학습을 다시 시켜야하는 번거로움을 어떻게 해결할까?
-
-'machine learning for kids' 서비스 중지에 관해 더 알아보기.
-
-
-
-
-
-
-
-## kakaomap_soyoung.py
-
-##### [기능]
-
-카페이름을 카카오맵에 검색하여 주소 크롤링
-
-
-
-## kakaomap_yunju.py
-
-##### [기능]
-
-카카오맵에서 이름 검색을 통해 카페의 주소, 전화번호, 업종 크롤링
-
-
+  json 형식으로 카페명, 게시글, 주소, 전화번호, 업종, 수식어, 신뢰도를 저장
 
 
 
@@ -140,21 +77,12 @@ Chrome driver의 headless 기능 설정
 
 ##### [기능]
 
-인스타그램 게시물 정보 크롤링 + 수식어 분석
+wholeCode2.py와 기능 동일
 
-host url을 통해 테스트 가능
+다른점이 있다면 postman을 통해 로그인 정보를 받아올 수 있도록 함
 
-##### [주의사항]
+(postman에서 아래와 같은 형식으로 입력하여 send)
 
-- instaCrawling과 dataAnalyisis를 합친 코드
+![postman](C:\Users\USER\Desktop\postman.PNG)
 
-- 외부에서 로그인 정보를 보내고, host url을 통해 분석 정보를 받음
-
-  (postman 프로그램을 활용해 테스트함)
-
-  (외부에서 인스타 로그인 정보와 machine learning for kids 로그인 정보를 보냄)
-
-##### [개선사항]
-
-머신러닝 모델링을 직접할 수 없을까?
-
+코드 실행에 대한 결과도 postman에 전송이 됨

@@ -9,9 +9,10 @@ import os
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import requests
+from bs4 import BeautifulSoup
 from flask import Flask, request, json
-import json
-import pandas as pd
+
+
 
 
 
@@ -20,19 +21,16 @@ import pandas as pd
 
 app = Flask(__name__)
 
-
 commonResponse = {
     'version' : '2.0',
     'resultCode' : 'OK',
     'output' : {}
 }
 
-
-
+# utterance parameter 받기
 def getUtteranceParameter() :
     data = request.get_json()
     return data['action']['parameters']
-
 
 
 @app.route('/instagramChatbot', methods=['POST'])
@@ -41,313 +39,599 @@ def instaAnalysis():
 
 
 
+
+
+
+
+
+    '''-------------------------------------------------------'''
+    # 드라이버 연결 -> BeautifulSoup 설정
+    '''-------------------------------------------------------'''
+
+    ##  드라이버 설치 경로
+    driver_path = 'C:/Project/chromedriver.exe'
+
+
+    ## 드라이버 연결
+    driver = webdriver.Chrome(driver_path)
+
+
+
     '''-------------------------------------------------------'''
     # 로그인
     '''-------------------------------------------------------'''
 
-    ## url 열기
-    driver = webdriver.Chrome('C:/Project/chromedriver.exe')
-    driver.get('https://www.instagram.com/accounts/login/')
-    time.sleep(2)
+    def login(id, password, url):
 
 
-    ## 로그인 할 ID (인스타 아이디!! 이메일 전화번호 안됨!!)
-    utteranceParameter = getUtteranceParameter()
-    id = utteranceParameter['instagram']['id']
-    ## 로그인 할 Password
-    password = utteranceParameter['instagram']['password']
+        try:
+            ## 로그인할 url 연결
+            driver.get(url)
+            time.sleep(2)
 
 
-    ## ID, Password 입력
-    driver.find_elements_by_name("username")[0].send_keys(id)
-    driver.find_elements_by_name("password")[0].send_keys(password)
-    time.sleep(2)
+            ## ID, Password 입력
+            driver.find_elements_by_name("username")[0].send_keys(id)
+            driver.find_elements_by_name("password")[0].send_keys(password)
+            time.sleep(2)
 
 
-    ## '로그인' 버튼 클릭
-    driver.find_element_by_xpath("//*[@id='loginForm']/div[1]/div[3]/button/div").click()
-    time.sleep(5)
-
-
-    ## '로그인 정보 나중에 저장' 버튼 클릭
-    driver.get('https://www.instagram.com/accounts/onetap/')
-    driver.find_element_by_xpath("//*[@id='react-root']/section/main/div/div/div/div/button").click()
-    time.sleep(2)
+            ## '로그인' 버튼 클릭
+            driver.find_element_by_xpath("//*[@id='loginForm']/div[1]/div[3]/button/div").click()
+            time.sleep(5)
 
 
 
-    ## 프로필(saved lists) 들어가기
-    driver.get('https://www.instagram.com/' + id + '/saved/')
-
-
-
-
-    '''-------------------------------------------------------'''
-    # 크롤링
-    '''-------------------------------------------------------'''
-
-
-
-    ## HTTP 가져오기
-    req = requests.get('https://www.instagram.com/' + id + '/saved/')
-    html = req.text
-
-
-
-    ## 게시물 url 주소 저장
-
-
-
-    ### url 저장할 리스트
-    urllist = []
-
-    while True:
-        pageString = driver.page_source
-        bs = BeautifulSoup(pageString, "lxml")
-
-        for link1 in bs.find_all(name="div",attrs={"class":"Nnq7C weEfm"}):
-
+            ## '로그인 정보 저장' 버튼 처리
             try:
-                title = link1.select('a')[0]
-                real = title.attrs['href']
-                urllist.append(real)
-            except :
-                print('더 이상 게시글이 존재하지 않습니다.')
-            try:
-                title = link1.select('a')[1]
-                real = title.attrs['href']
-                urllist.append(real)
+
+                ### '로그인 정보 나중에 저장' 버튼 클릭
+                driver.get('https://www.instagram.com/accounts/onetap/')
+                driver.find_element_by_xpath("//*[@id='react-root']/section/main/div/div/div/div/button").click()
+                time.sleep(2)
+
+
+
             except:
-                print('더 이상 게시글이 존재하지 않습니다.')
-            try :
-                title = link1.select('a')[2]
-                real = title.attrs['href']
-                urllist.append(real)
-            except :
-                print('게시물 갯수: ' + str(len(urllist)))
+                print('login info error')
 
 
-        ### 스크롤 내리기 및 반복 마무리
-        last_height = driver.execute_script("return document.body.scrollHeight")
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        new_height = driver.execute_script("return document.body.scrollHeight")
-        if new_height == last_height:
+
+        except:
+            print('login error')
+
+
+
+
+    '''-------------------------------------------------------'''
+    # 인스타 크롤링
+    '''-------------------------------------------------------'''
+
+
+    def instaCrawling(id):
+
+
+        ## 프로필(saved lists) 들어가기
+        driver.get('https://www.instagram.com/' + id + '/saved/')
+
+
+        ## HTTP 가져오기
+        req = requests.get('https://www.instagram.com/' + id + '/saved/')
+        html = req.text
+
+
+
+        ## 게시물 url 주소 저장
+
+
+
+        ### url 저장할 리스트
+        urllist = []
+
+        while True:
+            pageString = driver.page_source
+            bs = BeautifulSoup(pageString, "lxml")
+
+            for link1 in bs.find_all(name="div",attrs={"class":"Nnq7C weEfm"}):
+
+                try:
+                    title = link1.select('a')[0]
+                    real = title.attrs['href']
+                    urllist.append(real)
+                except :
+                    print('더 이상 게시글이 존재하지 않습니다.')
+                try:
+                    title = link1.select('a')[1]
+                    real = title.attrs['href']
+                    urllist.append(real)
+                except:
+                    print('더 이상 게시글이 존재하지 않습니다.')
+                try :
+                    title = link1.select('a')[2]
+                    real = title.attrs['href']
+                    urllist.append(real)
+                except :
+                    print('게시물 갯수: ' + str(len(urllist)))
+
+
+
+            ### 스크롤 내리기 및 반복 마무리
+            last_height = driver.execute_script("return document.body.scrollHeight")
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(1.2)
             new_height = driver.execute_script("return document.body.scrollHeight")
             if new_height == last_height:
-                break
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                time.sleep(1.2)
+                new_height = driver.execute_script("return document.body.scrollHeight")
+                if new_height == last_height:
+                    break
+                else:
+                    last_height = new_height
+                    continue
+
+
+        ctxlist = []
+        namelist = []
+
+
+        try:
+            for i in range(0, len(urllist)):
+
+                ### url로 게시물 접근
+                req = 'https://www.instagram.com' + urllist[i]
+                driver.get(req)
+                html = driver.page_source
+                soup = BeautifulSoup(html, "html.parser")
+
+
+                ### 게시글 크롤링
+                try:
+                    content = soup.select('div.C4VMK > span')[0].text
+                except:
+                    content = ''
+
+                ctxlist.append(content)
+
+
+                ### 업소명 크롤링(첫번째 해시태그가 업소명인 경우!!!)
+                try:
+                    name = soup.select('div.C4VMK > span > a')[0].text
+                    name = name.replace("#", "")
+                except:
+                    name = ''
+                namelist.append(name)
+
+
+        except:
+            print("error")
+
+
+
+
+        return ctxlist, namelist
+
+
+
+
+
+    '''-------------------------------------------------------'''
+    # 카카오맵에서 카페명 검색
+    '''-------------------------------------------------------'''
+
+
+    def searchName(name, url):
+        ## 페이지 새로고침
+        driver.get(url)
+
+        ## 검색어 입력
+        search_area = driver.find_element_by_xpath('//*[@id="search.keyword.query"]')
+        search_area.send_keys(name)
+
+        ## Enter로 검색
+        driver.find_element_by_xpath('//*[@id="search.keyword.submit"]').send_keys(Keys.ENTER)
+        time.sleep(1)
+
+        return driver
+
+
+
+
+
+
+    '''-------------------------------------------------------'''
+    # 주소 크롤링
+    '''-------------------------------------------------------'''
+
+    def addressCrawling(name):
+
+        ## BeautifulSoup 설정
+        html = searchDriver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+
+
+
+        ## 검색게시물 순서
+        count = int(0)
+
+
+
+        ## 검색된 각 게시물에 대해
+        cafe_list = soup.select('.placelist  .PlaceItem')
+
+
+
+        for cafe in cafe_list:
+
+
+            try:
+
+                ## 검색 게시물의 카페명
+                searchedName = soup.select('.PlaceItem.clickArea .link_name')[count].text
+
+
+
+                ## 주소 저장 (일치하는 게시물에 대해)
+                if(name == searchedName):
+                    cafe_address = cafe.select('.PlaceItem.clickArea .addr > p')[0].text
+                    # address.append(cafe_address)
+                    print(cafe_address)
+
+                    return cafe_address
+
+
+
+                    ## 검색명과 일치하는 게시물이 없을 시
+                else:
+
+
+                    ### 마지막 게시물이 아니면 반복 진행
+                    if(count <= len(cafe.select('.PlaceItem.clickArea .link_name'))):
+                        print('address next')
+
+
+
+                    ### 마지막 게시물이라면 공백 저장 후 반복 종료
+                    else:
+                        #address.append('')
+                        print('address break')
+
+                        return ''
+
+
+                count += 1
+
+
+            except:
+                print('address error')
+                return ''
+
+
+
+
+
+
+    '''-------------------------------------------------------'''
+    # 전화번호 크롤링
+    '''-------------------------------------------------------'''
+
+    def phoneCrawling(name):
+
+
+        ## BeautifulSoup 설정
+        html = searchDriver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+
+
+        ## 검색게시물 순서
+        count = int(0)
+
+
+        ## 검색된 각 게시물에 대해
+        cafe_list = soup.select('.placelist  .PlaceItem')
+
+
+        for cafe in cafe_list:
+
+
+            try:
+
+
+                ## 검색 게시물의 카페명
+                searchedName = soup.select('.PlaceItem.clickArea .link_name')[count].text
+
+
+                ## 번호 저장 (일치하는 게시물에 대해)
+                if (name == searchedName):
+                    cafe_phone = cafe.select('.PlaceItem.clickArea .phone')[0].text
+                    # phone.append(cafe_phone)
+                    print(cafe_phone)
+                    return cafe_phone
+
+
+                ## 검색명과 일치하는 게시물이 없을 시
+                else:
+
+                    ### 마지막 게시물이 아니면 반복 진행
+                    if (count <= len(cafe.select('.PlaceItem.clickArea .link_name'))):
+                        print('phone next')
+
+
+                    ### 마지막 게시물이라면 공백 저장 후 반복 종료
+                    else:
+                        phone.append('')
+                        print('phone break')
+                        return ''
+
+
+                count += 1
+
+
+            except:
+                print('phone error')
+                return ''
+
+
+
+
+    '''-------------------------------------------------------'''
+    # 업종명 크롤링
+    '''-------------------------------------------------------'''
+
+    def industryCrawling(name):
+
+
+        ## BeautifulSoup 설정
+        html = searchDriver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+
+
+        ## 검색게시물 순서
+        count = int(0)
+
+
+        ## 검색된 각 게시물에 대해
+        cafe_list = soup.select('.placelist  .PlaceItem')
+
+
+        for cafe in cafe_list:
+
+
+            try:
+
+
+                ## 검색 게시물의 카페명
+                searchedName = soup.select('.PlaceItem.clickArea .link_name')[count].text
+
+
+                ## 업종명 저장 (일치하는 게시물에 대해)
+                if (name == searchedName):
+                    cafe_indust = cafe.select('.PlaceItem.clickArea .clickable')[0].text
+                    print(cafe_indust)
+                    return cafe_indust
+
+
+                ## 검색명과 일치하는 게시물이 없을 시
+                else:
+
+                    ### 마지막 게시물이 아니면 반복 진행
+                    if (count <= len(cafe.select('.PlaceItem.clickArea .link_name'))):
+                        print('industry next')
+
+
+                    ### 마지막 게시물이라면 공백 저장 후 반복 종료
+                    else:
+                        phone.append('')
+                        print('industry break')
+                        return ''
+
+
+                count += 1
+
+
+            except:
+                print('industry error')
+                return ''
+
+
+
+
+
+    '''-------------------------------------------------------'''
+    # 수식어 분석
+    '''-------------------------------------------------------'''
+
+    def modifierAnalysis(context):
+
+        try:
+            ## 학습모델 호출
+            def classify(context):
+
+                key = "bf8af0a0-5a41-11eb-99e6-fb4ecbaf4f51248f7a0e-6e01-438d-810a-7171f54c646e"
+                classify_url = "https://machinelearningforkids.co.uk/api/scratch/" + key + "/classify"
+
+                response = requests.get(classify_url, params={"data": context})
+
+                if response.ok:
+                    responseData = response.json()
+                    topMatch = responseData[0]
+                    return topMatch
+                else:
+                    response.raise_for_status()
+
+
+
+            ## 분석 실행
+            analysis = classify(context)
+
+
+
+            ## 변수 설정
+
+            ### 수식어 {dessert, mood, photo, view}
+            modifier = analysis["class_name"]
+
+            ### 신뢰도
+            confidence = analysis["confidence"]
+
+
+
+
+            ## 결과 저장
+
+            ### 신뢰도가 60이상인 경우 수식어 저장
+            ### 신뢰도가 낮은 경우 'non'으로 저장
+            if confidence >= 60:
+                return modifier, confidence
             else:
-                last_height = new_height
-                continue
+                return 'non', confidence
 
 
-    ctxlist = []
-    namelist = []
-
-
-    try:
-        for i in range(0, len(urllist)):
-
-            ### url로 게시물 접근
-            req = 'https://www.instagram.com' + urllist[i]
-            driver.get(req)
-            webpage = driver.page_source
-            soup = BeautifulSoup(webpage, "html.parser")
-
-
-            ### 게시글 크롤링
-            try:
-                content = soup.select('div.C4VMK > span')[0].text
-            except:
-                content = ''
-
-            ctxlist.append(content)
-
-
-            ### 업소명 크롤링(첫번째 해시태그가 업소명인 경우!!!)
-            try:
-                name = soup.select('div.C4VMK > span > a')[0].text
-                name = name.replace("#", "")
-            except:
-                name = ''
-            namelist.append(name)
-
-
-    except:
-        print("error")
+        except:
+            print('dataAnalysis error')
 
 
 
+    '''-------------------------------------------------------'''
+    # db 저장
+    '''-------------------------------------------------------'''
 
-    ## 결과값 확인
-    print("게시물 갯수: " + str(len(urllist)) + "개\n\n")
+    def saveDB(file_path, data_length):
 
-    for i in range(0, len(urllist)):
-        print("===========================================")
-        print("\n[" + str(i+1) + "번째 게시물]")
-        print("\n이름: " + namelist[i])
-        print("\n" + ctxlist[i])
+
+        ## 데이터를 저장할 변수
+        dataAnalysis = dict()
+
+
+        ## 데이터 저장
+        for i in range(0, data_length):
+
+            ### key 설정
+            Name = dict()
+
+            ### value 설정
+            Name["name"] = namelist[i]
+            Name["context"] = ctxlist[i]
+            Name["address"] = address[i]
+            Name["phone"] = phone[i]
+            Name["industry"] = industry[i]
+            Name["classify"] = classify[i]
+            Name["confidence"] = confidence[i]
+
+            ### json 저장
+            dataAnalysis[str(namelist[i])] = Name
+
+
+        ## 파일 저장
+        with open(file_path, 'w', encoding='utf-8') as make_file:
+            json.dump(dataAnalysis, make_file, indent = "\t")
+
+
+
+        return dataAnalysis
 
 
 
 
 
-    ## json 파일 저장
+    '''-------------------------------------------------------'''
+    # 코드 실행
+    '''-------------------------------------------------------'''
 
-    ### 파일 쓰기
-    instaInfo = dict()
-
-    for i in range(0, len(urllist)):
-        Name = namelist[i]
-        Name = dict()
-        Name["name"] = namelist[i]
-        Name["context"] = ctxlist[i]
-        instaInfo[str(namelist[i])] = Name
-
-
-
-    ## 드라이버 끄기
-    driver.close()
-    driver.quit()
-
-
-    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-    # 머신러닝 url 로그인
-    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-    ## url 열기
-    driver = webdriver.Chrome('C:/Project/chromedriver.exe')
-    driver.get('https://machinelearningforkids.co.uk/#!/login')
-    time.sleep(2)
-
-    ## '로그인' 버튼 클릭
-    driver.find_element_by_xpath("/html/body/div/div/div[2]/div/div[3]/button").click()
-    time.sleep(5)
-
-    ## 로그인
+    ## id, password 파라미터 받기
     utteranceParameter = getUtteranceParameter()
-    ID = utteranceParameter['machine']['id']
-    PASSWORD = utteranceParameter['machine']['password']
+    id = utteranceParameter['login']['id']
+    password = utteranceParameter['login']['password']
 
-    ## ID, Password 입력
-    driver.find_elements_by_name("username")[0].send_keys(ID)
-    driver.find_elements_by_name("password")[0].send_keys(PASSWORD)
-    time.sleep(2)
+    ## 변수 설정
+    instagram_url = 'https://www.instagram.com/accounts/login/'
+    kakaomap_url = 'https://map.kakao.com/'
+    namelist = []
+    ctxlist = []
+    address = []
+    bigRegion = []
+    smallRegion = []
+    industry = []
+    phone = []
+    classify = []
+    confidence = []
+    file_path = 'C:\Project\Data_' + id + ".json"
 
-    ## '로그인' 버튼 클릭
-    driver.find_element_by_xpath("//*[@id='auth0-lock-container-1']/div/div[2]/form/div/div/div/button").click()
-    time.sleep(5)
 
 
-    driver.get('https://machinelearningforkids.co.uk/#!/mlproject/auth0%7C600598e65dbf6e006eacc05a/092c7930-5999-11eb-950b-73b1ea51afd9/models')
-    time.sleep(30)
+    ## 인스타 로그인
+    login(id, password, instagram_url)
 
 
-    ## 드라이버 끄기
+
+
+    ## 인스타 크롤링(게시글, 카페명)
+    instagramData = instaCrawling(id)
+    namelist = instagramData[1]
+    ctxlist = instagramData[0]
+
+
+
+
+
+    ## 카카오맵 크롤링(주소, 번호, 업종)
+    for name in namelist:
+
+        print(name)
+
+        ## 카페 검색
+        searchDriver = searchName(name, kakaomap_url)
+
+        ## 주소 크롤링
+        a = addressCrawling(name)
+        address.append(a)
+        time.sleep(0.2)
+
+        ## 번호 크롤링
+        p = phoneCrawling(name)
+        phone.append(p)
+        time.sleep(0.2)
+
+        ## 업종 크롤링
+        i = industryCrawling(name)
+        industry.append(i)
+        time.sleep(0.2)
+
+        print('----------------------------')
+
+
+
+
+    ## 수식어 분석
+    for context in ctxlist:
+        result = modifierAnalysis(context)
+        classify.append(result[0])
+        confidence.append(result[1])
+
+    print(classify)
+    print(confidence)
+
+
+
+    ## 데이터 파일 저장
+    data_length = len(namelist)
+    dataAnalysis = saveDB(file_path, data_length)
+    print()
+
+
+
+    ## 드라이브 종료
     driver.close()
     driver.quit()
 
-    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-    # json 파일 호출
-    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-    ## json 파일 열기
-    json_data = instaInfo
 
-    ## 데이터 형식 변경
-
-    ### 데이터프레임 형식
-    df = pd.DataFrame(json_data)
-
-    ### 리스트형식으로 게시글 저장
-    ctxData = []
-    for i in json_data:
-        ctxData.append(df[i]['context'])
-
-    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-    # 학습 모델
-    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-    ## 수식어 분석 기능(meaching learning for kids)
-    def classify(text):
-        key = "bf8af0a0-5a41-11eb-99e6-fb4ecbaf4f51248f7a0e-6e01-438d-810a-7171f54c646e"
-        url = "https://machinelearningforkids.co.uk/api/scratch/" + key + "/classify"
-
-        response = requests.get(url, params={"data": text})
-
-        if response.ok:
-            responseData = response.json()
-            topMatch = responseData[0]
-            return topMatch
-        else:
-            response.raise_for_status()
-
-    ## 게시글 분석
-
-    label_data = []
-    confi_data = []
-
-    for i in ctxData:
-
-        ### 게시글 입력
-        demoStr = i
-        demo = classify(i)
-
-        ### 수식어 {dessert, mood, photo, view}
-        label = demo["class_name"]
-        ### 신뢰도
-        confidence = demo["confidence"]
-
-        ### 결과 저장
-
-        #### 신뢰도가 60이상인 경우 수식어 저장
-        #### 신뢰도가 낮은 경우 'non'으로 저장
-        if confidence >= 60:
-            label_data.append(label)
-        else:
-            label_data.append('non')
-
-        #### 신뢰도 저장
-        confi_data.append("%d%%" % (confidence))
-
-    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-    # json 저장
-    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-    ## label, confidence 추가
-    count = int(0)
-    for i in json_data:
-        json_data['%s' % i]['label'] = label_data[count]
-        json_data['%s' % i]['confidence'] = confi_data[count]
-        count += 1
-    json_data['게시물 갯수'] = count
-
-    ''''''''''''''''''''''''''''''''''''''''''''''''''
-    # 결과 출력
-    ''''''''''''''''''''''''''''''''''''''''''''''''''
-
-    ## 파일 저장
-    file_name = "\Data_" + id + ".json"
-    with open('C:\Project'+ file_name, 'w', encoding='utf-8') as make_file:
-        json.dump(instaInfo, make_file, indent="\t")
+    ## Url 전송
+    return json.dumps(dataAnalysis)
 
 
 
-    ## 출력
-    print(json.dumps(json_data, indent="\t", ensure_ascii=False))
-
-    for i in range(0, len(label_data)):
-        print(label_data[i])
-        print(confi_data[i])
-
-
-
-    ## host url로 전송
-    return json.dumps(json_data)
-
-
-
-
+# Flask 실행
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5500, debug=True)
+
+
