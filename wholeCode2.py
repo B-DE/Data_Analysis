@@ -463,6 +463,55 @@ def modifierAnalysis(context):
 
 
 
+
+'''-------------------------------------------------------'''
+# 단위별 지역 데이터 분석
+'''-------------------------------------------------------'''
+
+def regionAnalysis(text):
+
+
+    bigRegion = []
+    smallRegion = []
+
+
+    try:
+        ## 띄어쓰기 단위로 자르기
+        textList = text.split()
+
+
+
+        ## 시단위 지역 데이터 추출
+        try:
+            for i in textList:
+                if i.endswith('시' or '군'):
+                    bigRegion.append(i)
+            print(bigRegion)
+
+        except:
+            bigRegion = ''
+
+
+
+        ## 동, 읍면리 단위 지역 데이터 추출
+        try:
+            for i in textList:
+                if i.endswith('동') or i.endswith('읍') or i.endswith('면') or i.endswith('리') or i.endswith('구'):
+                    smallRegion.append(i)
+            print(smallRegion)
+        except:
+            smallRegion = ''
+
+
+    except:
+        print('region analysis error')
+
+
+    return bigRegion, smallRegion
+
+
+
+
 '''-------------------------------------------------------'''
 # db 저장
 '''-------------------------------------------------------'''
@@ -484,6 +533,8 @@ def saveDB(file_path, data_length):
         Name["name"] = namelist[i]
         Name["context"] = ctxlist[i]
         Name["address"] = address[i]
+        Name["bigRegion"] = bigRegion[i]
+        Name["smallRegion"] = smallRegion[i]
         Name["phone"] = phone[i]
         Name["industry"] = industry[i]
         Name["classify"] = classify[i]
@@ -496,6 +547,8 @@ def saveDB(file_path, data_length):
     ## 파일 저장
     with open(file_path, 'w', encoding='utf-8') as make_file:
         json.dump(dataAnalysis, make_file, indent = "\t")
+
+
 
 
 
@@ -542,26 +595,42 @@ for name in namelist:
 
     print(name)
 
-    ## 카페 검색
+    ### 카페 검색
     searchDriver = searchName(name, kakaomap_url)
 
-    ## 주소 크롤링
+    ### 주소 크롤링
     a = addressCrawling(name)
     address.append(a)
     time.sleep(0.2)
 
-    ## 번호 크롤링
+    ### 번호 크롤링
     p = phoneCrawling(name)
     phone.append(p)
     time.sleep(0.2)
 
-    ## 업종 크롤링
+    ### 업종 크롤링
     i = industryCrawling(name)
     industry.append(i)
     time.sleep(0.2)
 
     print('----------------------------')
 
+
+
+
+
+## 주소 데이터 정제
+for text in address:
+
+    ### 시단위 지역 데이터 분석
+    bigRegion = regionAnalysis(text)[0]
+    print("[시단위]" + bigRegion)
+
+    ### 동, 읍면리 단위 데이터 분석
+    smallRegion = regionAnalysis(text)[1]
+    print("[동/읍면리 단위]" + smallRegion)
+
+    print('----------------------------')
 
 
 
@@ -575,14 +644,17 @@ print(classify)
 print(confidence)
 
 
-
 ## 데이터 파일 저장
 data_length = len(namelist)
 saveDB(file_path, data_length)
-print()
+
 
 
 
 ## 드라이브 종료
 driver.close()
 driver.quit()
+
+
+
+
