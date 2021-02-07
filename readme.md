@@ -81,8 +81,6 @@ wholeCode2.py와 기능 동일
 
 다른점이 있다면 postman을 통해 로그인 정보를 받아올 수 있도록 함
 
-(postman에서 아래와 같은 형식으로 입력하여 send)
-
-![postman](C:\Users\USER\Desktop\postman.PNG)
+(postman 입력 방식은 postman.PNG에서 확인)
 
 코드 실행에 대한 결과도 postman에 전송이 됨
