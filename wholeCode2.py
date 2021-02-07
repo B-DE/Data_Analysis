@@ -346,7 +346,7 @@ def phoneCrawling(name):
 
 
 '''-------------------------------------------------------'''
-# 업종명
+# 업종명 크롤링
 '''-------------------------------------------------------'''
 
 def industryCrawling(name):
@@ -407,6 +407,99 @@ def industryCrawling(name):
 
 
 
+
+'''-------------------------------------------------------'''
+# 수식어 분석
+'''-------------------------------------------------------'''
+
+def modifierAnalysis(context):
+
+    try:
+        ## 학습모델 호출
+        def classify(context):
+
+            key = "bf8af0a0-5a41-11eb-99e6-fb4ecbaf4f51248f7a0e-6e01-438d-810a-7171f54c646e"
+            classify_url = "https://machinelearningforkids.co.uk/api/scratch/" + key + "/classify"
+
+            response = requests.get(classify_url, params={"data": context})
+
+            if response.ok:
+                responseData = response.json()
+                topMatch = responseData[0]
+                return topMatch
+            else:
+                response.raise_for_status()
+
+
+
+        ## 분석 실행
+        analysis = classify(context)
+
+
+
+        ## 변수 설정
+
+        ### 수식어 {dessert, mood, photo, view}
+        modifier = analysis["class_name"]
+
+        ### 신뢰도
+        confidence = analysis["confidence"]
+
+
+
+
+        ## 결과 저장
+
+        ### 신뢰도가 60이상인 경우 수식어 저장
+        ### 신뢰도가 낮은 경우 'non'으로 저장
+        if confidence >= 60:
+            return modifier, confidence
+        else:
+            return 'non', confidence
+
+
+    except:
+        print('dataAnalysis error')
+
+
+
+'''-------------------------------------------------------'''
+# db 저장
+'''-------------------------------------------------------'''
+
+def saveDB(file_path, data_length):
+
+
+    ## 데이터를 저장할 변수
+    dataAnalysis = dict()
+
+
+    ## 데이터 저장
+    for i in range(0, data_length):
+
+        ### key 설정
+        Name = dict()
+
+        ### value 설정
+        Name["name"] = namelist[i]
+        Name["context"] = ctxlist[i]
+        Name["address"] = address[i]
+        Name["phone"] = phone[i]
+        Name["industry"] = industry[i]
+        Name["classify"] = classify[i]
+        Name["confidence"] = confidence[i]
+
+        ### json 저장
+        dataAnalysis[str(namelist[i])] = Name
+
+
+    ## 파일 저장
+    with open(file_path, 'w', encoding='utf-8') as make_file:
+        json.dump(dataAnalysis, make_file, indent = "\t")
+
+
+
+
 '''-------------------------------------------------------'''
 # 코드 실행
 '''-------------------------------------------------------'''
@@ -423,7 +516,9 @@ bigRegion = []
 smallRegion = []
 industry = []
 phone = []
-
+classify = []
+confidence = []
+file_path = 'C:\Project\Data_' + id + ".json"
 
 
 ## 인스타 로그인
@@ -436,6 +531,7 @@ login(id, password, instagram_url)
 instagramData = instaCrawling(id)
 namelist = instagramData[1]
 ctxlist = instagramData[0]
+
 
 
 
@@ -467,5 +563,25 @@ for name in namelist:
 
 
 
+
+## 수식어 분석
+for context in ctxlist:
+    result = modifierAnalysis(context)
+    classify.append(result[0])
+    confidence.append(result[1])
+
+print(classify)
+print(confidence)
+
+
+
+## 데이터 파일 저장
+data_length = len(namelist)
+saveDB(file_path, data_length)
+print()
+
+
+
+## 드라이브 종료
 driver.close()
 driver.quit()
