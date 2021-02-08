@@ -435,6 +435,46 @@ def instaAnalysis():
 
 
 
+    '''-------------------------------------------------------'''
+    # 단위별 지역 데이터 분석
+    '''-------------------------------------------------------'''
+
+    def regionAnalysis(text):
+
+        bigRegion = []
+        smallRegion = []
+
+        try:
+            ## 띄어쓰기 단위로 자르기
+            textList = text.split()
+
+            ## 시단위 지역 데이터 추출
+            try:
+                for i in textList:
+                    if i.endswith('시' or '군'):
+                        bigRegion.append(i)
+                # print(bigRegion)
+
+            except:
+                bigRegion = ''
+
+            ## 동, 읍면리 단위 지역 데이터 추출
+            try:
+                for i in textList:
+                    if i.endswith('동') or i.endswith('읍') or i.endswith('면') or i.endswith('리') or i.endswith('구'):
+                        smallRegion.append(i)
+                # print(smallRegion)
+            except:
+                smallRegion = ''
+
+
+        except:
+            print('region analysis error')
+
+        return bigRegion, smallRegion
+
+
+
 
     '''-------------------------------------------------------'''
     # 수식어 분석
@@ -497,14 +537,11 @@ def instaAnalysis():
 
     def saveDB(file_path, data_length):
 
-
         ## 데이터를 저장할 변수
         dataAnalysis = dict()
 
-
         ## 데이터 저장
         for i in range(0, data_length):
-
             ### key 설정
             Name = dict()
 
@@ -512,6 +549,8 @@ def instaAnalysis():
             Name["name"] = namelist[i]
             Name["context"] = ctxlist[i]
             Name["address"] = address[i]
+            Name["bigRegion"] = bigRegion[i]
+            Name["smallRegion"] = smallRegion[i]
             Name["phone"] = phone[i]
             Name["industry"] = industry[i]
             Name["classify"] = classify[i]
@@ -520,13 +559,12 @@ def instaAnalysis():
             ### json 저장
             dataAnalysis[str(namelist[i])] = Name
 
-
         ## 파일 저장
         with open(file_path, 'w', encoding='utf-8') as make_file:
-            json.dump(dataAnalysis, make_file, indent = "\t")
+            json.dump(dataAnalysis, make_file, indent="\t")
 
 
-
+s
         return dataAnalysis
 
 
@@ -559,7 +597,7 @@ def instaAnalysis():
 
 
     ## 인스타 로그인
-    login(id, password, instagram_url)
+    login(id, password, instagram_url
 
 
 
@@ -597,6 +635,29 @@ def instaAnalysis():
         time.sleep(0.2)
 
         print('----------------------------')
+
+
+
+
+    ## 주소 데이터 정제
+    for text in address:
+
+        ### 시단위 지역 데이터 분석
+        bigregion = regionAnalysis(text)[0]
+        bigRegion.append(bigregion)
+        print(bigregion)
+
+        ### 동, 읍면리 단위 데이터 분석
+        smallregion = regionAnalysis(text)[1]
+        smallRegion.append(smallregion)
+        print(smallregion)
+
+        print('----------------------------')
+
+
+
+    print(bigRegion)
+    print(smallRegion)
 
 
 

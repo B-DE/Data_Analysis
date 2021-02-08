@@ -486,7 +486,7 @@ def regionAnalysis(text):
             for i in textList:
                 if i.endswith('시' or '군'):
                     bigRegion.append(i)
-            print(bigRegion)
+            # print(bigRegion)
 
         except:
             bigRegion = ''
@@ -498,7 +498,7 @@ def regionAnalysis(text):
             for i in textList:
                 if i.endswith('동') or i.endswith('읍') or i.endswith('면') or i.endswith('리') or i.endswith('구'):
                     smallRegion.append(i)
-            print(smallRegion)
+            # print(smallRegion)
         except:
             smallRegion = ''
 
@@ -623,25 +623,38 @@ for name in namelist:
 for text in address:
 
     ### 시단위 지역 데이터 분석
-    bigRegion = regionAnalysis(text)[0]
-    print("[시단위]" + bigRegion)
+    bigregion = regionAnalysis(text)[0]
+    bigRegion.append(bigregion)
+    print(bigregion)
 
     ### 동, 읍면리 단위 데이터 분석
-    smallRegion = regionAnalysis(text)[1]
-    print("[동/읍면리 단위]" + smallRegion)
+    smallregion = regionAnalysis(text)[1]
+    smallRegion.append(smallregion)
+    print(smallregion)
 
     print('----------------------------')
+
+
+
+print(bigRegion)
+print(smallRegion)
 
 
 
 ## 수식어 분석
 for context in ctxlist:
     result = modifierAnalysis(context)
+    print(result[0])
+    print(result[1])
     classify.append(result[0])
     confidence.append(result[1])
 
+
+
+print('----------------------------')
 print(classify)
 print(confidence)
+
 
 
 ## 데이터 파일 저장
@@ -658,3 +671,7 @@ driver.quit()
 
 
 
+# text = '서울 용산구 녹사평대로46길 38'
+#
+# result = regionAnalysis(text)
+# print(result)
