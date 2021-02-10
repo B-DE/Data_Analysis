@@ -484,7 +484,7 @@ def regionAnalysis(text):
         ## 시단위 지역 데이터 추출
         try:
             for i in textList:
-                if i.endswith('시' or '군'):
+                if i.endswith('시') or i.endswith('군'):
                     bigRegion.append(i)
             # print(bigRegion)
 

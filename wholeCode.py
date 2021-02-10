@@ -451,7 +451,7 @@ def instaAnalysis():
             ## 시단위 지역 데이터 추출
             try:
                 for i in textList:
-                    if i.endswith('시' or '군'):
+                    if i.endswith('시') or i.endswith('군'):
                         bigRegion.append(i)
                 # print(bigRegion)
 
@@ -564,15 +564,14 @@ def instaAnalysis():
             json.dump(dataAnalysis, make_file, indent="\t")
 
 
-s
+
         return dataAnalysis
 
 
 
 
 
-    '''-------------------------------------------------------'''
-    # 코드 실행
+    '''-------------------------------------------------------'''# 코드 실행
     '''-------------------------------------------------------'''
 
     ## id, password 파라미터 받기
@@ -597,7 +596,7 @@ s
 
 
     ## 인스타 로그인
-    login(id, password, instagram_url
+    login(id, password, instagram_url)
 
 
 
