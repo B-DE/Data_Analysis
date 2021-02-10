@@ -532,13 +532,13 @@ def saveDB(file_path, data_length):
         ### value 설정
         Name["name"] = namelist[i]
         Name["context"] = ctxlist[i]
-        Name["address"] = address[i]
-        Name["bigRegion"] = bigRegion[i]
-        Name["smallRegion"] = smallRegion[i]
-        Name["phone"] = phone[i]
-        Name["industry"] = industry[i]
-        Name["classify"] = classify[i]
-        Name["confidence"] = confidence[i]
+        # Name["address"] = address[i]
+        # Name["bigRegion"] = bigRegion[i]
+        # Name["smallRegion"] = smallRegion[i]
+        # Name["phone"] = phone[i]
+        # Name["industry"] = industry[i]
+        # Name["classify"] = classify[i]
+        # Name["confidence"] = confidence[i]
 
         ### json 저장
         dataAnalysis[str(namelist[i])] = Name
@@ -558,8 +558,8 @@ def saveDB(file_path, data_length):
 '''-------------------------------------------------------'''
 
 ## 변수 설정
-id = ''
-password = ''
+id = 'yun9u_00'
+password = 'emmadaria0110##'
 instagram_url = 'https://www.instagram.com/accounts/login/'
 kakaomap_url = 'https://map.kakao.com/'
 namelist = []
@@ -588,73 +588,73 @@ ctxlist = instagramData[0]
 
 
 
-
-
-## 카카오맵 크롤링(주소, 번호, 업종)
-for name in namelist:
-
-    print(name)
-
-    ### 카페 검색
-    searchDriver = searchName(name, kakaomap_url)
-
-    ### 주소 크롤링
-    a = addressCrawling(name)
-    address.append(a)
-    time.sleep(0.2)
-
-    ### 번호 크롤링
-    p = phoneCrawling(name)
-    phone.append(p)
-    time.sleep(0.2)
-
-    ### 업종 크롤링
-    i = industryCrawling(name)
-    industry.append(i)
-    time.sleep(0.2)
-
-    print('----------------------------')
-
-
-
-
-
-## 주소 데이터 정제
-for text in address:
-
-    ### 시단위 지역 데이터 분석
-    bigregion = regionAnalysis(text)[0]
-    bigRegion.append(bigregion)
-    print(bigregion)
-
-    ### 동, 읍면리 단위 데이터 분석
-    smallregion = regionAnalysis(text)[1]
-    smallRegion.append(smallregion)
-    print(smallregion)
-
-    print('----------------------------')
-
-
-
-print(bigRegion)
-print(smallRegion)
-
-
-
-## 수식어 분석
-for context in ctxlist:
-    result = modifierAnalysis(context)
-    print(result[0])
-    print(result[1])
-    classify.append(result[0])
-    confidence.append(result[1])
-
-
-
-print('----------------------------')
-print(classify)
-print(confidence)
-
+#
+#
+# ## 카카오맵 크롤링(주소, 번호, 업종)
+# for name in namelist:
+#
+#     print(name)
+#
+#     ### 카페 검색
+#     searchDriver = searchName(name, kakaomap_url)
+#
+#     ### 주소 크롤링
+#     a = addressCrawling(name)
+#     address.append(a)
+#     time.sleep(0.2)
+#
+#     ### 번호 크롤링
+#     p = phoneCrawling(name)
+#     phone.append(p)
+#     time.sleep(0.2)
+#
+#     ### 업종 크롤링
+#     i = industryCrawling(name)
+#     industry.append(i)
+#     time.sleep(0.2)
+#
+#     print('----------------------------')
+#
+#
+#
+#
+#
+# ## 주소 데이터 정제
+# for text in address:
+#
+#     ### 시단위 지역 데이터 분석
+#     bigregion = regionAnalysis(text)[0]
+#     bigRegion.append(bigregion)
+#     print(bigregion)
+#
+#     ### 동, 읍면리 단위 데이터 분석
+#     smallregion = regionAnalysis(text)[1]
+#     smallRegion.append(smallregion)
+#     print(smallregion)
+#
+#     print('----------------------------')
+#
+#
+#
+# print(bigRegion)
+# print(smallRegion)
+#
+#
+#
+# ## 수식어 분석
+# for context in ctxlist:
+#     result = modifierAnalysis(context)
+#     print(result[0])
+#     print(result[1])
+#     classify.append(result[0])
+#     confidence.append(result[1])
+#
+#
+#
+# print('----------------------------')
+# print(classify)
+# print(confidence)
+#
 
 
 ## 데이터 파일 저장
